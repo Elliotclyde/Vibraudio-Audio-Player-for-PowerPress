@@ -2,7 +2,7 @@
 
 /*
 Plugin Name: Vibraudio Audio Player for PowerPress
-Plugin URI:
+Plugin URI: https://github.com/Elliotclyde/Vibraudio-Audio-Player-for-PowerPress
 Description: A vibrant audio embed addon for the Powerpress plugin.
 Version: 1.0.0
 Author: Hugh Haworth
