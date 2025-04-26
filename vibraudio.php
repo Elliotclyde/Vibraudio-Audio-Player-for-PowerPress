@@ -166,7 +166,7 @@ function enqueue_audio_player_scripts() {
 }
 add_action( 'wp_enqueue_scripts', 'enqueue_audio_player_scripts' );
 
-function audio_options_page_html() {
+function vibraudio_options_page_html() {
 
     // Handle form submission
     if ( isset( $_POST['submit'] ) ) {
@@ -205,11 +205,11 @@ function audio_options_page_html() {
 function audio_options_page()
 {
     add_options_page(
-		'Vibraudio Options',
+	'Vibraudio Options',
         'Vibraudio', 
         'manage_options',
-        'audio_options',
-        'audio_options_page_html',
+        'vibraudio_options',
+        'vibraudio_options_page_html',
 	);
 }
  add_action('admin_menu', 'audio_options_page');
