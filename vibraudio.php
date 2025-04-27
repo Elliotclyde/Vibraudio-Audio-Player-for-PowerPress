@@ -5,11 +5,12 @@ Plugin Name: Vibraudio Audio Player for PowerPress
 Plugin URI: https://github.com/Elliotclyde/Vibraudio-Audio-Player-for-PowerPress
 Description: A vibrant audio embed addon for the Powerpress plugin.
 Version: 1.0.0
+License: GPLv2 or later 
 Author: Hugh Haworth
 Author URI: https://elliotclyde.nz
 Requires at least: 3.6
 Tested up to: 6.8
-Text Domain: audioplayer 
+Text Domain: vibraudio 
 Change Log:
 
 Contributors:
@@ -169,8 +170,13 @@ add_action( 'wp_enqueue_scripts', 'enqueue_audio_player_scripts' );
 function vibraudio_options_page_html() {
 
     // Handle form submission
-    if ( isset( $_POST['submit'] ) ) {
-
+    if ( isset( $_POST['submit'] ) && isset($_REQUEST['_wpnonce'] )) {
+        $nonce = wp_unslash($_REQUEST['_wpnonce']);
+        if ( ! wp_verify_nonce($nonce ) ){
+	        die( __( 'Security check', 'textdomain' ) ); 
+            return; // Nonce check failed, do not process the form
+        }
+        check_admin_referer();
         $vibraudioAudioPlayerSettings = array(
             'player_on' => isset( $_POST['player_on'] ) ? 1 : 0,
         );
@@ -190,16 +196,18 @@ function vibraudio_options_page_html() {
 	<div class="wrap">
 		<h1><?php echo esc_html( get_admin_page_title() ); ?></h1>
 		<form  method="post">
+        <?php wp_nonce_field(); ?>
         <!-- Adds option for player_on -->
-         <label for="player-on"><?php _e( 'Enable Player', 'textdomain' ); ?></label><br />
+         <label for="player-on">Activate Player</label><br />
             <input id="player-on" type="checkbox" name="player_on" value="1" <?php checked( get_option('vibraudio_audioplayer_settings')['player_on'], 1 ); ?> />
-        
+
 			<?php
 			submit_button( __( 'Save Settings', 'textdomain' ) );
 			?>
 		</form>
 	</div>
     <?php
+
 }
 
 function audio_options_page()
