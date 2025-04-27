@@ -173,7 +173,6 @@ function vibraudio_options_page_html() {
     if ( isset( $_POST['submit'] ) && isset($_REQUEST['_wpnonce'] )) {
         $nonce = wp_unslash($_REQUEST['_wpnonce']);
         if ( ! wp_verify_nonce($nonce ) ){
-	        die( __( 'Security check', 'textdomain' ) ); 
             return; // Nonce check failed, do not process the form
         }
         check_admin_referer();
@@ -183,7 +182,7 @@ function vibraudio_options_page_html() {
         update_option( 'vibraudio_audioplayer_settings', $vibraudioAudioPlayerSettings );
 
         // Show success message
-        add_settings_error( 'vibraudio_audioplayer_messages', 'vibraudio_audioplayer_message', __( 'Settings Saved', 'textdomain' ), 'updated' );
+        add_settings_error( 'vibraudio_audioplayer_messages', 'vibraudio_audioplayer_message', __( 'Settings Saved', 'vibraudio' ), 'updated' );
     }
 
     // Get current settings safely
@@ -202,7 +201,7 @@ function vibraudio_options_page_html() {
             <input id="player-on" type="checkbox" name="player_on" value="1" <?php checked( get_option('vibraudio_audioplayer_settings')['player_on'], 1 ); ?> />
 
 			<?php
-			submit_button( __( 'Save Settings', 'textdomain' ) );
+			submit_button( __( 'Save Settings', 'vibraudio' ) );
 			?>
 		</form>
 	</div>
