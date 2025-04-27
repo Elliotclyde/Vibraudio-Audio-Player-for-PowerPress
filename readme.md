@@ -4,6 +4,7 @@ Requires PHP: 7.0
 Requires at least: 4.7
 Tested up to: 6.8 
 License: GPLv2 or later
+
 A vibrant audio embed addon for the Powerpress plugin.
 
 Will show episode art if it exists, and will otherwise use the podcast feed art. 
