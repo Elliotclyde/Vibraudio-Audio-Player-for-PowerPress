@@ -7,17 +7,17 @@ Description: A vibrant audio embed addon for the Powerpress plugin.
 Version: 1.0.0
 License: GPLv2 or later 
 Author: Hugh Haworth
-Author URI: https://elliotclyde.nz
+Author URI: https://www.elliotclyde.nz
 Requires at least: 3.6
 Tested up to: 6.8
-Text Domain: vibraudio 
+Text Domain: vibraudio-audio-player-for-powerpress
 Change Log:
 
 Contributors:
 Hugh Haworth
 */
 
-function create_vibraudio_audio_player($episodeTitle, $audioUrl,$imageUrl,$postUrl) {
+function vibraudio_create_audio_player($episodeTitle, $audioUrl,$imageUrl,$postUrl) {
     // This function creates a vibraudio audio player from the given URL
     // You can use any audio player library or custom code here
     // For example, using HTML5 audio tag:HTML CSS JSResult Skip Results Iframe
@@ -63,7 +63,7 @@ return '<div class="vibraudio-audio-player-container" style="--bg-image: url(' .
 </div>';
 }
 
-function add_audio_player($the_content) {
+function vibraudio_add_audio_player_to_content($the_content) {
     $PowerPressSettings = get_option('powerpress_general', array());
 	$FeedSettings = get_option('powerpress_feed', array() );
     $vibraudioAudioPlayerSettings = get_option('vibraudio_audioplayer_settings', array());
@@ -75,14 +75,14 @@ function add_audio_player($the_content) {
     $post_id = $post->ID;
     // get url of audio file
     
-    $url = get_url($post_id, 0, true); // get first media file
+    $url = vibraudio_get_powerpress_enclosure_url($post_id, 0, true); // get first media file
     
                             if (isset($EpisodeData['image']) && $EpisodeData['image'] != '')
                                 $image = $EpisodeData['image'];
 
 
-    $imageUrl="http://example.com/image.jpg"; // Default image URL if not set
-    $episodeImageUrl = get_powerpress_episode_image($post_id);
+    $imageUrl=""; 
+    $episodeImageUrl = vibraudio_get_powerpress_episode_image($post_id);
     if ($episodeImageUrl) {
         $imageUrl = $episodeImageUrl; // Use the episode image URL if available
     } else {
@@ -97,16 +97,16 @@ function add_audio_player($the_content) {
     switch( $PowerPressSettings['display_player'] )
     {
         case 1: { // Below posts
-            return $the_content . create_vibraudio_audio_player($post->post_title, $url,$imageUrl,  get_permalink($post_id)) ;
+            return $the_content . vibraudio_create_audio_player($post->post_title, $url,$imageUrl,  get_permalink($post_id)) ;
         }; break;
         case 2: { // Above posts
-            return  create_vibraudio_audio_player($post->post_title, $url,$imageUrl, get_permalink($post_id)) . $the_content ;
+            return  vibraudio_create_audio_player($post->post_title, $url,$imageUrl, get_permalink($post_id)) . $the_content ;
         }; break;
     }
     return $the_content; 
 }
 
-function getPpPostMeta($post_id, $key)
+function vibraudio_get_powerpress_post_meta($post_id, $key)
 {
     $pp_meta_cache = wp_cache_get($post_id, 'post_meta');
     if ( !$pp_meta_cache ) {
@@ -127,9 +127,9 @@ function getPpPostMeta($post_id, $key)
     return $meta;
 }
 
-function get_url($post_id, $mediaNum = 0, $include_premium = false) {
+function vibraudio_get_powerpress_enclosure_url($post_id, $mediaNum = 0, $include_premium = false) {
 
-    $MetaData= getPpPostMeta($post_id, 'enclosure');
+    $MetaData= vibraudio_get_powerpress_post_meta($post_id, 'enclosure');
     if( $MetaData)
     {
             $MetaParts = explode("\n", $MetaData, 4);
@@ -138,8 +138,8 @@ function get_url($post_id, $mediaNum = 0, $include_premium = false) {
     return '';
 
 }
-function get_powerpress_episode_image($post_id) {
-    $MetaData= getPpPostMeta($post_id, 'enclosure');
+function vibraudio_get_powerpress_episode_image($post_id) {
+    $MetaData= vibraudio_get_powerpress_post_meta($post_id, 'enclosure');
     if( $MetaData)
     {
         $MetaParts = explode("\n", $MetaData, 4);
@@ -154,9 +154,9 @@ function get_powerpress_episode_image($post_id) {
     return null;
 }
 
-add_filter('the_content', 'add_audio_player');
+add_filter('the_content', 'vibraudio_add_audio_player_to_content');
 
-function enqueue_audio_player_scripts() {
+function vibraudio_enqueue_audio_player_scripts() {
     // Only load on the front-end, not in admin
     if ( ! is_admin() ) {
         $plugin_url = plugin_dir_url(__FILE__);
@@ -165,14 +165,13 @@ function enqueue_audio_player_scripts() {
         wp_enqueue_script('vibraudio-audio-scripts', $plugin_url . '/scripts.js', array(),'1.0', true);
     }
 }
-add_action( 'wp_enqueue_scripts', 'enqueue_audio_player_scripts' );
+add_action( 'wp_enqueue_scripts', 'vibraudio_enqueue_audio_player_scripts' );
 
-function vibraudio_options_page_html() {
+function vibraudio_audio_options_page_html() {
 
     // Handle form submission
-    if ( isset( $_POST['submit'] ) && isset($_REQUEST['_wpnonce'] )) {
-        $nonce = wp_unslash($_REQUEST['_wpnonce']);
-        if ( ! wp_verify_nonce($nonce ) ){
+    if ( isset( $_POST['submit'] ) && isset($_POST['_wpnonce'] )) {
+        if ( ! wp_verify_nonce(sanitize_key($_POST['_wpnonce']) ) ){
             return; // Nonce check failed, do not process the form
         }
         check_admin_referer();
@@ -182,7 +181,7 @@ function vibraudio_options_page_html() {
         update_option( 'vibraudio_audioplayer_settings', $vibraudioAudioPlayerSettings );
 
         // Show success message
-        add_settings_error( 'vibraudio_audioplayer_messages', 'vibraudio_audioplayer_message', __( 'Settings Saved', 'vibraudio' ), 'updated' );
+        add_settings_error( 'vibraudio_audioplayer_messages', 'vibraudio_audioplayer_message', __( 'Settings Saved', 'vibraudio-audio-player-for-powerpress' ), 'updated' );
     }
 
     // Get current settings safely
@@ -201,7 +200,7 @@ function vibraudio_options_page_html() {
             <input id="player-on" type="checkbox" name="player_on" value="1" <?php checked( get_option('vibraudio_audioplayer_settings')['player_on'], 1 ); ?> />
 
 			<?php
-			submit_button( __( 'Save Settings', 'vibraudio' ) );
+			submit_button( __( 'Save Settings', 'vibraudio-audio-player-for-powerpress' ) );
 			?>
 		</form>
 	</div>
@@ -209,14 +208,14 @@ function vibraudio_options_page_html() {
 
 }
 
-function audio_options_page()
+function vibraudio_audio_options_page()
 {
     add_options_page(
 	'Vibraudio Options',
         'Vibraudio', 
         'manage_options',
         'vibraudio_options',
-        'vibraudio_options_page_html',
+        'vibraudio_audio_options_page_html',
 	);
 }
- add_action('admin_menu', 'audio_options_page');
+ add_action('admin_menu', 'vibraudio_audio_options_page');
